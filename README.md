@@ -5,18 +5,18 @@
 ### Examples:
 
 Reading a single result:
-```
-	var command = new PowerShellCommand("My-Command");
-	command.AddArgument("ArgValue");
-	
-	// OR:
-	command.AddParameter("ArgValue", "ArgName");
+```csharp
+var command = new PowerShellCommand("My-Command");
+command.AddArgument("ArgValue");
 
-	var result = command.ExecuteScalar();
+// OR:
+command.AddParameter("ArgValue", "ArgName");
+
+var result = command.ExecuteScalar();
 ```
 
 Reading a hashtable:
-```
+```csharp
 var command = new PowerShellCommand("Get-ServerMemory");
 
 var servers = new List<Server>();
