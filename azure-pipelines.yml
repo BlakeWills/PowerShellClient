@@ -8,7 +8,6 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  VersionNumber: '1.0.*'
 
 steps:
 - task: versioncounter@1
