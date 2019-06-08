@@ -1,6 +1,7 @@
 # PowerShellClient
 .Net Standard PowerShell client with a SqlClient based API.
 
+[![Build Status](https://dev.azure.com/BWills/PowerShellClient/_apis/build/status/BlakeWills.PowerShellClient?branchName=master)](https://dev.azure.com/BWills/PowerShellClient/_build/latest?definitionId=2&branchName=master)
 
 ### Examples:
 
