@@ -10,6 +10,7 @@
     <PackageTags>powershell powershellclient</PackageTags>
     <PackageProjectUrl>https://github.com/BlakeWills/PowerShellClient</PackageProjectUrl>
     <Description>PowerShell client with a SqlClient based API.</Description>
+    <PackageId>BlakeWills.PowerShellClient</PackageId>
   </PropertyGroup>
 
 </Project>
