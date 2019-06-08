@@ -25,7 +25,16 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: Create NuGet Package
   inputs:
     command: 'pack'
     packagesToPack: '**/PowerShellClient.csproj'
     versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: Publish NuGet Package
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'Nuget.org'
