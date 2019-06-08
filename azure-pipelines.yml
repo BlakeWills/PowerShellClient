@@ -21,5 +21,11 @@ steps:
   displayName: Test
   inputs:
     command: test
-    projects: '**/PowerShellClient.Tests.csproj'
+    projects: '**/.Tests.csproj'
     arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/PowerShellClient.csproj'
+    versioningScheme: 'off'
