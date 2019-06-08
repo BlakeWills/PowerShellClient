@@ -37,7 +37,8 @@ steps:
   inputs:
     command: 'pack'
     packagesToPack: '**/PowerShellClient.csproj'
-    versioningScheme: 'off'
+    versioningScheme: 'byEnvVar'
+    versionEnvVar: 'VersionNumber'
 
 - task: NuGetCommand@2
   displayName: Publish NuGet Package
