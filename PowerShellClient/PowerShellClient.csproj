@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.0.0.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Blake Wills</Authors>
+    <Company />
+    <RepositoryUrl>https://github.com/BlakeWills/PowerShellClient</RepositoryUrl>
+    <PackageTags>powershell powershellclient</PackageTags>
+    <PackageProjectUrl>https://github.com/BlakeWills/PowerShellClient</PackageProjectUrl>
+    <Description>PowerShell client with a SqlClient based API.</Description>
   </PropertyGroup>
 
 </Project>
