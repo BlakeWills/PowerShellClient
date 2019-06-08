@@ -8,8 +8,17 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  VersionNumber: '1.0.*'
 
 steps:
+- task: versioncounter@1
+  displayName: Increment Version
+  inputs:
+    VersionVariable: 'VersionNumber'
+    UpdateMinorVersion: true
+    MaxValuePatchVersion: '20'
+    DevOpsPat: '2plzryowu6yj7m6lfscxrnckryr4pzdlplbgyj54gntqvrjmsqsq'
+
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
@@ -30,14 +39,6 @@ steps:
     command: 'pack'
     packagesToPack: '**/PowerShellClient.csproj'
     versioningScheme: 'off'
-
-#- task: DotNetCoreCLI@2
-#  displayName: Publish NuGet Package
-#  inputs:
-#    command: 'push'
-#    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-#    nuGetFeedType: 'external'
-#    publishFeedCredentials: 'Nuget.org'
 
 - task: NuGetCommand@2
   displayName: Publish NuGet Package
