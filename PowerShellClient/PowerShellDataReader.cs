@@ -7,9 +7,7 @@ namespace PowerShellClient
     public sealed class PowerShellDataReader : IDisposable
     {
         private readonly StreamReader _streamReader;
-
-        private string[] _currentRow;
-        private Dictionary<string, int> _columnNameMap;
+        private Dictionary<string, string> _currentRow;
 
         internal PowerShellDataReader(StreamReader streamReader)
         {
@@ -18,47 +16,46 @@ namespace PowerShellClient
 
         public bool Read()
         {
-            if (_columnNameMap == null)
-            {
-                GetColumnNameMap();
+            var isFirstRead = _currentRow == null;
+            _currentRow = new Dictionary<string, string>();
 
-                // Discard the second line as it's just a partition.
-                _ = _streamReader.ReadLine();
+            while(!_streamReader.EndOfStream)
+            {
+                var field = _streamReader.ReadLine().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (field.Length == 0)
+                {
+                    if(isFirstRead && _currentRow.Count == 0)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if(field.Length == 1)
+                {
+                    throw new PowerShellException("Invalid Results Set. The command did not produce tabular data.");
+                }
+
+                if(field.Length > 2)
+                {
+                    _currentRow.Add(field[0].Trim(), RebuildSplitValue(field).Trim());
+                }
+                else
+                {
+                    _currentRow.Add(field[0].Trim(), field[1].Trim());
+                }
             }
 
-            if (!_streamReader.EndOfStream)
-            {
-                _currentRow = _streamReader.ReadLine().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                return _currentRow.Length != 0;
-            }
-            else
-            {
-                return false;
-            }
+            return _currentRow.Count > 0;
         }
 
-        private void GetColumnNameMap()
+        private static string RebuildSplitValue(string[] field)
         {
-            string[] columnNames = null;
-
-            while (columnNames == null && !_streamReader.EndOfStream)
-            {
-                columnNames = _streamReader.ReadLine().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                columnNames = columnNames.Length == 0 ? null : columnNames;
-            }
-
-            if (columnNames == null)
-            {
-                throw new PowerShellException("Command ran successfully but had no output.");
-            }
-
-            _columnNameMap = new Dictionary<string, int>();
-
-            for (int i = 0; i < columnNames.Length; i++)
-            {
-                _columnNameMap.Add(columnNames[i], i);
-            }
+            return string.Join(":", field, 1, field.Length - 1);
         }
 
         public string this[string columnName]
@@ -68,14 +65,18 @@ namespace PowerShellClient
 
         private string GetValue(string columnName)
         {
-            if(_columnNameMap == null)
+            if(_currentRow == null)
             {
-                throw new InvalidOperationException("Read() must be called before trying to access the current row");
+                throw new InvalidOperationException($"{nameof(Read)}() must be called before trying to access the current row");
+            }
+            else if(_currentRow.Count == 0)
+            {
+                throw new InvalidOperationException("The command did not return a result.");
             }
 
             // Let the KeyNotFound exception be thrown from the dictionary.
             // It's slightly faster to not check and we were only going to throw an exception with a similar error message anyway.
-            return _currentRow[_columnNameMap[columnName]];
+            return _currentRow[columnName];
         }
 
         public void Dispose()

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 
 namespace PowerShellClient.Tests
 {
@@ -15,6 +16,35 @@ namespace PowerShellClient.Tests
             var result = command.ExecuteScalar();
 
             Assert.AreEqual(expectedResult, result);
+        }
+
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public void GivenNullOrEmptyCommand_ThrowsArgumentNullException(string commandText)
+        {
+            Assert.Throws<ArgumentNullException>(() => new PowerShellCommand(commandText));
+        }
+
+        [Test]
+        public void ExecuteScalar_WhenCommandReturnsNoOutput_ReturnsEmptyString()
+        {
+            var command = new PowerShellCommand("function Get-HostsInClusterTest {} Get-HostsInClusterTest");
+
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
+        public void ExecuteScalar_WhenCommandReturnsNull_ReturnsEmptyString()
+        {
+            var command = new PowerShellCommand("$null");
+
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(string.Empty, result);
         }
 
         [Test]
@@ -65,6 +95,36 @@ namespace PowerShellClient.Tests
             var command = new PowerShellCommand("ThisCmdletDoesNotExist");
 
             Assert.Throws<PowerShellException>(() => command.ExecuteScalar());
+        }
+
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public void AddParameter_GivenNullOrEmptyValue_ThrowsArgumentNullException(string value)
+        {
+            var command = new PowerShellCommand("Script");
+            Assert.Throws<ArgumentNullException>(() => command.AddParameter(value, "paramName"));
+        }
+
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public void AddArgument_GivenNullOrEmptyValue_ThrowsArgumentNullException(string value)
+        {
+            var command = new PowerShellCommand("Script");
+            Assert.Throws<ArgumentNullException>(() => command.AddArgument(value));
+        }
+
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public void AddParameter_GivenNullOrEmptyParamName_ThrowsArgumentNullException(string paramName)
+        {
+            var command = new PowerShellCommand("Script");
+            Assert.Throws<ArgumentNullException>(() => command.AddParameter("value", paramName));
         }
     }
 }

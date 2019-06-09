@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -12,6 +13,8 @@ namespace PowerShellClient
 
         public PowerShellCommand(string script)
         {
+            ThrowIfNull(script, nameof(script));
+
             _script = script;
             _parameters = new List<PowerShellParameter>();
         }
@@ -20,30 +23,35 @@ namespace PowerShellClient
 
         public void AddArgument(object value)
         {
+            ThrowIfNull(value, nameof(value));
+
             _parameters.Add(new PowerShellParameter(value));
         }
 
         public void AddParameter(object value, string name)
         {
+            ThrowIfNull(value, nameof(value));
+            ThrowIfNull(name, nameof(name));
+
             _parameters.Add(new PowerShellNamedParameter(name, value));
         }
 
         public string ExecuteScalar()
         {
-            return Execute().ReadToEnd().Trim();
+            return Execute(GetCommandString()).ReadToEnd().Trim();
         }
 
         public PowerShellDataReader ExecuteDataReader()
         {
-            return new PowerShellDataReader(Execute());
+            return new PowerShellDataReader(Execute($"{GetCommandString()} | Format-List"));
         }
 
-        private StreamReader Execute()
+        private StreamReader Execute(string command)
         {
             var processStartInfo = new ProcessStartInfo()
             {
                 FileName = "powershell",
-                Arguments = GetCommandString(),
+                Arguments = command,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
@@ -76,6 +84,14 @@ namespace PowerShellClient
             }
 
             return builder.ToString();
+        }
+
+        private static void ThrowIfNull(object value, string paramName)
+        {
+            if (string.IsNullOrWhiteSpace(value?.ToString()))
+            {
+                throw new ArgumentNullException(paramName);
+            }
         }
     }
 }
