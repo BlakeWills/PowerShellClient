@@ -49,7 +49,7 @@ namespace PowerShellClient
 
         public async Task ExecuteStreamAsync(DataReceivedEventHandler dataReceivedEventHandler)
         {
-            var processStartInfo = GetProcessStartInfo();
+            var processStartInfo = GetProcessStartInfo(GetCommandString());
 
             await Task.Run(() =>
             {
@@ -72,7 +72,7 @@ namespace PowerShellClient
 
         private StreamReader Execute(string command)
         {
-            var processStartInfo = GetProcessStartInfo();
+            var processStartInfo = GetProcessStartInfo(command);
 
             using (var ps = new Process())
             {
@@ -97,12 +97,12 @@ namespace PowerShellClient
             }
         }
 
-        private ProcessStartInfo GetProcessStartInfo()
+        private static ProcessStartInfo GetProcessStartInfo(string command)
         {
             return new ProcessStartInfo()
             {
                 FileName = "powershell",
-                Arguments = GetCommandString(),
+                Arguments = command,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
