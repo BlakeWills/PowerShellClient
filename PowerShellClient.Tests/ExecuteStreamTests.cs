@@ -12,9 +12,9 @@ namespace PowerShellClient.Tests
         public async Task GivenLongRunningScript_AllOutputIsCaptured()
         {
             var script = @"
-                Write-Output 'Started'
-                Start-Sleep -Milliseconds 500
-                Write-Output 'Finished'";
+                Write-Output 'Started';
+                Start-Sleep -Milliseconds 500;
+                Write-Output 'Finished';";
 
             var output = await ExecuteStream(script);
 
@@ -32,11 +32,11 @@ namespace PowerShellClient.Tests
             var infoPref = $"$InformationPreference = \"\"\"Continue\"\"\";{Environment.NewLine}";
             var verbosePref = $"$VerbosePreference = \"\"\"Continue\"\"\";{Environment.NewLine}";
 
-            script = $"{debugPref}{infoPref}{verbosePref}{Environment.NewLine}{script}";
+            var scriptWithPrefs = $"{debugPref}{infoPref}{verbosePref}{Environment.NewLine}{script}";
 
-            var output = await ExecuteStream(script);
+            var output = await ExecuteStream(scriptWithPrefs);
 
-            Assert.AreEqual(expectedOutput, output);
+            Assert.AreEqual(expectedOutput, output, message: $"Input: {script}");
         }
 
         [Test]
