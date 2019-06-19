@@ -18,6 +18,9 @@ namespace PowerShellClient.Tests
 
             var output = await ExecuteStream(script);
 
+            // some systems give us two new lines
+            output = output.Replace("\r\n\r\n", "\r\n");
+
             Assert.AreEqual($"Started{Environment.NewLine}Finished", output);
         }
 
