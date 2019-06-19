@@ -62,10 +62,10 @@ namespace PowerShellClient.Tests
         }
 
         [Test]
-        public void AddArgument_GivenStringArgument_WhenCommandIsRunArgumentValueIsQuoted()
+        public void AddArgument_GivenStringArgumentWithDefaultQuoteOptions_WhenCommandIsRunArgumentValueIsQuoted()
         {
             const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
-            const string expectedResult = "Hello, World"; // Would fail due to the comma if not quoted.
+            const string expectedResult = "Hello, World";
 
             var command = new PowerShellCommand(script);
             command.AddArgument(expectedResult);
@@ -73,6 +73,35 @@ namespace PowerShellClient.Tests
             var result = command.ExecuteScalar();
 
             Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
+        public void AddArgument_GivenStringArgumentAndQuoteOptionsSetToQuote_WhenCommandIsRunArgumentValueIsQuoted()
+        {
+            const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
+            const string expectedResult = "Hello, World";
+
+            var command = new PowerShellCommand(script);
+            command.AddArgument(expectedResult, ParameterQuoteOptions.Quote);
+
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
+        public void AddArgument_GivenStringArgumentAndQuoteOptionsSetToNoQuote_WhenCommandIsRunArgumentValueIsNotQuoted()
+        {
+            const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
+            const string expectedResult = "Hello, World"; 
+
+            var command = new PowerShellCommand(script);
+            command.AddArgument(expectedResult, ParameterQuoteOptions.NoQuotes);
+
+            var result = command.ExecuteScalar();
+
+            // No comma as the arg was not quoted, this means the comma was seen as an argument seperator and not part of the value.
+            Assert.AreEqual("Hello World", result);
         }
 
         [Test]
@@ -125,6 +154,49 @@ namespace PowerShellClient.Tests
         {
             var command = new PowerShellCommand("Script");
             Assert.Throws<ArgumentNullException>(() => command.AddParameter("value", paramName));
+        }
+
+        [Test]
+        public void AddParameter_GivenStringArgumentWithDefaultQuoteOptions_WhenCommandIsRunArgumentValueIsQuoted()
+        {
+            const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
+            const string expectedResult = "Hello, World";
+
+            var command = new PowerShellCommand(script);
+            command.AddParameter(expectedResult, "arg");
+
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
+        public void AddParameter_GivenStringArgumentAndQuoteOptionsSetToQuote_WhenCommandIsRunArgumentValueIsQuoted()
+        {
+            const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
+            const string expectedResult = "Hello, World";
+
+            var command = new PowerShellCommand(script);
+            command.AddParameter(expectedResult, "arg", ParameterQuoteOptions.Quote);
+
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
+        public void AddParameter_GivenStringArgumentAndQuoteOptionsSetToNoQuote_WhenCommandIsRunArgumentValueIsNotQuoted()
+        {
+            const string script = "function MyTestFunc { param([string]$arg) Write-Output $arg } MyTestFunc";
+            const string expectedResult = "Hello, World";
+
+            var command = new PowerShellCommand(script);
+            command.AddParameter(expectedResult, "arg", ParameterQuoteOptions.NoQuotes);
+
+            var result = command.ExecuteScalar();
+
+            // No comma as the arg was not quoted, this means the comma was seen as an argument seperator and not part of the value.
+            Assert.AreEqual("Hello World", result);
         }
     }
 }

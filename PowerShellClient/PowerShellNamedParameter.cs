@@ -2,7 +2,7 @@
 {
     internal class PowerShellNamedParameter : PowerShellParameter
     {
-        public PowerShellNamedParameter(string name, object value) : base(value)
+        public PowerShellNamedParameter(string name, object value, ParameterQuoteOptions quoteOptions) : base(value, quoteOptions)
         {
             Name = name;
         }

@@ -21,19 +21,19 @@ namespace PowerShellClient
 
         public int CommandTimeoutSeconds { get; set; } = 30;
 
-        public void AddArgument(object value)
+        public void AddArgument(object value, ParameterQuoteOptions quoteOptions = ParameterQuoteOptions.Quote)
         {
             ThrowIfNull(value, nameof(value));
 
-            _parameters.Add(new PowerShellParameter(value));
+            _parameters.Add(new PowerShellParameter(value, quoteOptions));
         }
 
-        public void AddParameter(object value, string name)
+        public void AddParameter(object value, string name, ParameterQuoteOptions quoteOptions = ParameterQuoteOptions.Quote)
         {
             ThrowIfNull(value, nameof(value));
             ThrowIfNull(name, nameof(name));
 
-            _parameters.Add(new PowerShellNamedParameter(name, value));
+            _parameters.Add(new PowerShellNamedParameter(name, value, quoteOptions));
         }
 
         public string ExecuteScalar()
@@ -70,6 +70,12 @@ namespace PowerShellClient
                     throw new PowerShellException(errorMessage);
                 }
 
+                var errorStream = ps.StandardError.ReadToEnd();
+                if (!string.IsNullOrWhiteSpace(errorStream))
+                {
+                    throw new PowerShellException(errorStream);
+                }
+
                 return ps.StandardOutput;
             }
         }
@@ -78,7 +84,7 @@ namespace PowerShellClient
         {
             var builder = new StringBuilder(_script);
 
-            foreach(var param in _parameters)
+            foreach (var param in _parameters)
             {
                 builder.Append($" {param.ToString()} ");
             }
