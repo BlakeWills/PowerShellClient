@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace PowerShellClient
 {
@@ -46,16 +47,32 @@ namespace PowerShellClient
             return new PowerShellDataReader(Execute($"{GetCommandString()} | Format-List"));
         }
 
+        public async Task ExecuteStreamAsync(DataReceivedEventHandler dataReceivedEventHandler)
+        {
+            var processStartInfo = GetProcessStartInfo();
+
+            await Task.Run(() =>
+            {
+                using (var ps = new Process())
+                {
+                    ps.StartInfo = processStartInfo;
+
+                    ps.OutputDataReceived += dataReceivedEventHandler;
+                    ps.ErrorDataReceived += dataReceivedEventHandler;
+
+                    ps.Start();
+
+                    ps.BeginOutputReadLine();
+                    ps.BeginErrorReadLine();
+
+                    ps.WaitForExit();
+                }
+            });
+        }
+
         private StreamReader Execute(string command)
         {
-            var processStartInfo = new ProcessStartInfo()
-            {
-                FileName = "powershell",
-                Arguments = command,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
+            var processStartInfo = GetProcessStartInfo();
 
             using (var ps = new Process())
             {
@@ -78,6 +95,18 @@ namespace PowerShellClient
 
                 return ps.StandardOutput;
             }
+        }
+
+        private ProcessStartInfo GetProcessStartInfo()
+        {
+            return new ProcessStartInfo()
+            {
+                FileName = "powershell",
+                Arguments = GetCommandString(),
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
         }
 
         private string GetCommandString()
