@@ -10,14 +10,6 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: versioncounter@1
-  displayName: Increment Version
-  inputs:
-    VersionVariable: 'VersionNumber'
-    UpdateMinorVersion: true
-    MaxValuePatchVersion: '20'
-    DevOpsPat: '2plzryowu6yj7m6lfscxrnckryr4pzdlplbgyj54gntqvrjmsqsq'
-
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
@@ -31,6 +23,14 @@ steps:
     command: test
     projects: '**/PowerShellClient.Tests.csproj'
     arguments: '--configuration $(buildConfiguration)'
+
+- task: versioncounter@1
+  displayName: Increment Version
+  inputs:
+    VersionVariable: 'VersionNumber'
+    UpdateMinorVersion: true
+    MaxValuePatchVersion: '20'
+    DevOpsPat: '2plzryowu6yj7m6lfscxrnckryr4pzdlplbgyj54gntqvrjmsqsq'
 
 - task: DotNetCoreCLI@2
   displayName: Create NuGet Package
