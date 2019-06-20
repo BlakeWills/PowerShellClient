@@ -11,6 +11,7 @@ namespace PowerShellClient
     {
         private readonly string _script;
         private readonly List<PowerShellParameter> _parameters;
+        private string _workingDirectory;
 
         public PowerShellCommand(string script)
         {
@@ -37,6 +38,18 @@ namespace PowerShellClient
             _parameters.Add(new PowerShellNamedParameter(name, value, quoteOptions));
         }
 
+        public void SetWorkingDirectory(string directory)
+        {
+            ThrowIfNull(directory, nameof(directory));
+
+            if (!Directory.Exists(directory))
+            {
+                throw new ArgumentException("Directory does not exist.");
+            }
+
+            _workingDirectory = directory;
+        }
+
         public string ExecuteScalar()
         {
             return Execute(GetCommandString()).ReadToEnd().Trim();
@@ -49,7 +62,7 @@ namespace PowerShellClient
 
         public async Task ExecuteStreamAsync(DataReceivedEventHandler dataReceivedEventHandler)
         {
-            var processStartInfo = GetProcessStartInfo(GetCommandString());
+            var processStartInfo = GetProcessStartInfo(GetCommandString(), _workingDirectory);
 
             await Task.Run(() =>
             {
@@ -72,7 +85,7 @@ namespace PowerShellClient
 
         private StreamReader Execute(string command)
         {
-            var processStartInfo = GetProcessStartInfo(command);
+            var processStartInfo = GetProcessStartInfo(command, _workingDirectory);
 
             using (var ps = new Process())
             {
@@ -97,9 +110,9 @@ namespace PowerShellClient
             }
         }
 
-        private static ProcessStartInfo GetProcessStartInfo(string command)
+        private static ProcessStartInfo GetProcessStartInfo(string command, string workingDirectory)
         {
-            return new ProcessStartInfo()
+            var startInfo = new ProcessStartInfo()
             {
                 FileName = "powershell",
                 Arguments = command,
@@ -107,6 +120,13 @@ namespace PowerShellClient
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             };
+
+            if(!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                startInfo.WorkingDirectory = workingDirectory;
+            }
+
+            return startInfo;
         }
 
         private string GetCommandString()

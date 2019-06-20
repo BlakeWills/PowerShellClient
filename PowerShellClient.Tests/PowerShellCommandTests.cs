@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
+using System.IO;
+using System.Reflection;
 
 namespace PowerShellClient.Tests
 {
@@ -197,6 +199,38 @@ namespace PowerShellClient.Tests
 
             // No comma as the arg was not quoted, this means the comma was seen as an argument seperator and not part of the value.
             Assert.AreEqual("Hello World", result);
+        }
+
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase("\t")]
+        [TestCase(null)]
+        public void SetWorkingDirectory_GivenNullOrEmptyDirectory_ThrowsArgumentNullException(string directory)
+        {
+            var command = new PowerShellCommand("Script");
+            Assert.Throws<ArgumentNullException>(() => command.SetWorkingDirectory(directory));
+        }
+
+        [Test]
+        public void SetWorkingDirectory_GivenDirectoryThatDoesNotExist_ThrowsArgumentException()
+        {
+            var command = new PowerShellCommand("Script");
+            Assert.Throws<ArgumentException>(() => command.SetWorkingDirectory(Path.Combine(Environment.CurrentDirectory, "IDoNotExist_1234098765")));
+        }
+
+        [Test]
+        public void Execute_WhenWorkingDirectoryIsSpecified_ProcessIsStartedInWorkingDirectory()
+        {
+            const string script = "$(pwd).Path"; // Print Working Directory
+
+            // Use GetParent as the default working dir is the executing assembly location.
+            var expectedPath = Directory.GetParent(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).ToString();
+
+            var command = new PowerShellCommand(script);
+            command.SetWorkingDirectory(expectedPath);
+            var result = command.ExecuteScalar();
+
+            Assert.AreEqual(expectedPath, result);
         }
     }
 }
