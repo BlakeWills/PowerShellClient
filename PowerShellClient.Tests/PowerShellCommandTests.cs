@@ -230,7 +230,7 @@ namespace PowerShellClient.Tests
             command.SetWorkingDirectory(expectedPath);
             var result = command.ExecuteScalar();
 
-            Assert.AreEqual(expectedPath, result);
+            Assert.AreEqual(expectedPath.ToLowerInvariant(), result.ToLowerInvariant());
         }
     }
 }
